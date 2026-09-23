@@ -49,6 +49,18 @@ export default function Workspace() {
       body: JSON.stringify({ message: text, projectId: activeId }),
     });
 
+    if (res.status === 402) {
+      const err = await res.json().catch(() => ({}));
+      setChat((c) => [...c, { role: "assistant", content: err.error ?? "积分已用完，请升级套餐" }]);
+      setBusy(false);
+      return;
+    }
+    if (!res.ok) {
+      setChat((c) => [...c, { role: "assistant", content: "出错了，请稍后重试" }]);
+      setBusy(false);
+      return;
+    }
+
     if (!res.body) {
       setBusy(false);
       return;
