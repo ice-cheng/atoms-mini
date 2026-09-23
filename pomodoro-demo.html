@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄钟 - 专注工作与休息</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hover:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-hover:active {
+            transform: translateY(0);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .bg-gradient-work {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%);
+        }
+        
+        .bg-gradient-break {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-work flex items-center justify-center p-4 transition-all duration-1000" id="body">
+    <div class="w-full max-w-md">
+        <!-- 主卡片 -->
+        <div class="glass-effect rounded-3xl shadow-2xl p-8 md:p-10 fade-in">
+            <!-- 标题 -->
+            <h1 class="text-center text-2xl md:text-3xl font-bold text-gray-700 mb-2">
+                🍅 番茄钟
+            </h1>
+            <p class="text-center text-gray-500 mb-8 text-sm md:text-base" id="status-text">
+                专注工作时间
+            </p>
+            
+            <!-- 环形进度条 -->
+            <div class="relative flex items-center justify-center mb-8">
+                <svg class="progress-ring w-64 h-64 md:w-72 md:h-72" viewBox="0 0 200 200">
+                    <!-- 背景圆环 -->
+                    <circle
+                        class="text-white/40"
+                        stroke="currentColor"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="90"
+                        cx="100"
+                        cy="100"
+                    />
+                    <!-- 进度圆环 -->
+                    <circle
+                        id="progress-circle"
+                        class="progress-ring__circle text-teal-400"
+                        stroke="currentColor"
+                        stroke-width="8"
+                        stroke-linecap="round"
+                        fill="transparent"
+                        r="90"
+                        cx="100"
+                        cy="100"
+                        stroke-dasharray="565.48"
+                        stroke-dashoffset="0"
+                    />
+                </svg>
+                
+                <!-- 时间显示 -->
+                <div class="absolute flex flex-col items-center">
+                    <span id="time-display" class="text-5xl md:text-6xl font-bold text-gray-700 tracking-wider">
+                        25:00
+                    </span>
+                    <span id="session-count" class="text-sm text-gray-500 mt-2">
+                        第 1 个番茄
+                    </span>
+                </div>
+            </div>
+            
+            <!-- 控制按钮 -->
+            <div class="flex items-center justify-center gap-4 mb-6">
+                <!-- 重置按钮 -->
+                <button
+                    id="reset-btn"
+                    class="btn-hover w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/50 hover:bg-white/70 text-gray-600 flex items-center justify-center shadow-lg"
+                    title="重置"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 md:w-7 md:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+                
+                <!-- 开始/暂停按钮 -->
+                <button
+                    id="start-pause-btn"
+                    class="btn-hover w-20 h-20 md:w-24 md:h-24 rounded-full bg-teal-400 hover:bg-teal-500 text-white flex items-center justify-center shadow-xl"
+                    title="开始/暂停"
+                >
+                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 md:w-12 md:h-12 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 md:w-12 md:h-12 hidden" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                    </svg>
+                </button>
+                
+                <!-- 跳过按钮 -->
+                <button
+                    id="skip-btn"
+                    class="btn-hover w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/50 hover:bg-white/70 text-gray-600 flex items-center justify-center shadow-lg"
+                    title="跳过"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 md:w-7 md:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 模式指示 -->
+            <div class="flex justify-center gap-6">
+                <div id="work-indicator" class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-teal-400"></div>
+                    <span class="text-sm text-gray-600">工作 25分钟</span>
+                </div>
+                <div id="break-indicator" class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-green-300"></div>
+                    <span class="text-sm text-gray-600">休息 5分钟</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部提示 -->
+        <p class="text-center text-gray-500 text-xs mt-6 opacity-70">
+            保持专注，劳逸结合 ✨
+        </p>
+    </div>
+
+    <script>
+        // 配置
+        const WORK_TIME = 25 * 60; // 25分钟工作时间（秒）
+        const BREAK_TIME = 5 * 60; // 5分钟休息时间（秒）
+        const CIRCUMFERENCE = 2 * Math.PI * 90; // 圆周长
+        
+        // 状态
+        let timeLeft = WORK_TIME;
+        let isRunning = false;
+        let isWorkMode = true;
+        let timerInterval = null;
+        let sessionCount = 1;
+        
+        // DOM 元素
+        const timeDisplay = document.getElementById('time-display');
+        const progressCircle = document.getElementById('progress-circle');
+        const startPauseBtn = document.getElementById('start-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const resetBtn = document.getElementById('reset-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const statusText = document.getElementById('status-text');
+        const sessionCountEl = document.getElementById('session-count');
+        const body = document.getElementById('body');
+        const workIndicator = document.getElementById('work-indicator');
+        const breakIndicator = document.getElementById('break-indicator');
+        
+        // 初始化
+        function init() {
+            updateProgress();
+            updateDisplay();
+            updateModeIndicator();
+        }
+        
+        // 格式化时间显示
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 更新时间显示
+        function updateDisplay() {
+            timeDisplay.textContent = formatTime(timeLeft);
+            document.title = `${formatTime(timeLeft)} - ${isWorkMode ? '工作中' : '休息中'}`;
+        }
+        
+        // 更新进度环
+        function updateProgress() {
+            const totalTime = isWorkMode ? WORK_TIME : BREAK_TIME;
+            const progress = timeLeft / totalTime;
+            const offset = CIRCUMFERENCE * (1 - progress);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+        
+        // 更新模式指示器
+        function updateModeIndicator() {
+            if (isWorkMode) {
+                workIndicator.querySelector('div').classList.add('ring-2', 'ring-teal-200', 'ring-offset-2', 'ring-offset-transparent');
+                breakIndicator.querySelector('div').classList.remove('ring-2', 'ring-green-200', 'ring-offset-2', 'ring-offset-transparent');
+            } else {
+                breakIndicator.querySelector('div').classList.add('ring-2', 'ring-green-200', 'ring-offset-2', 'ring-offset-transparent');
+                workIndicator.querySelector('div').classList.remove('ring-2', 'ring-teal-200', 'ring-offset-2', 'ring-offset-transparent');
+            }
+        }
+        
+        // 切换模式
+        function switchMode() {
+            isWorkMode = !isWorkMode;
+            
+            if (isWorkMode) {
+                timeLeft = WORK_TIME;
+                statusText.textContent = '专注工作时间';
+                body.classList.remove('bg-gradient-break');
+                body.classList.add('bg-gradient-work');
+                progressCircle.classList.remove('text-green-400');
+                progressCircle.classList.add('text-teal-400');
+                startPauseBtn.classList.remove('bg-green-400', 'hover:bg-green-500');
+                startPauseBtn.classList.add('bg-teal-400', 'hover:bg-teal-500');
+                sessionCount++;
+                sessionCountEl.textContent = `第 ${sessionCount} 个番茄`;
+            } else {
+                timeLeft = BREAK_TIME;
+                statusText.textContent = '休息一下吧 ☕';
+                body.classList.remove('bg-gradient-work');
+                body.classList.add('bg-gradient-break');
+                progressCircle.classList.remove('text-teal-400');
+                progressCircle.classList.add('text-green-400');
+                startPauseBtn.classList.remove('bg-teal-400', 'hover:bg-teal-500');
+                startPauseBtn.classList.add('bg-green-400', 'hover:bg-green-500');
+            }
+            
+            updateModeIndicator();
+            updateProgress();
+            updateDisplay();
+            
+            // 播放提示音（使用 Web Audio API 生成简单的提示音）
+            playNotificationSound();
+        }
+        
+        // 播放提示音
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = isWorkMode ? 523.25 : 659.25; // C5 或 E5
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                // 第二声
+                setTimeout(() => {
+                    const osc2 = audioContext.createOscillator();
+                    const gain2 = audioContext.createGain();
+                    
+                    osc2.connect(gain2);
+                    gain2.connect(audioContext.destination);
+                    
+                    osc2.frequency.value = isWorkMode ? 659.25 : 783.99;
+                    osc2.type = 'sine';
+                    
+                    gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    osc2.start(audioContext.currentTime);
+                    osc2.stop(audioContext.currentTime + 0.5);
+                }, 200);
+            } catch (e) {
+                // 音频播放失败时静默处理
+            }
+        }
+        
+        // 开始/暂停
+        function toggleStartPause() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+        
+        // 开始计时器
+        function startTimer() {
+            isRunning = true;
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+            timeDisplay.classList.add('pulse-animation');
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                updateProgress();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    playIcon.classList.remove('hidden');
+                    pauseIcon.classList.add('hidden');
+                    timeDisplay.classList.remove('pulse-animation');
+                    switchMode();
+                    
+                    // 自动开始下一个周期
+                    setTimeout(() => {
+                        startTimer();
+                    }, 1000);
+                }
+            }, 1000);
+        }
+        
+        // 暂停计时器
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            timeDisplay.classList.remove('pulse-animation');
+        }
+        
+        // 重置
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = isWorkMode ? WORK_TIME : BREAK_TIME;
+            sessionCount = isWorkMode ? sessionCount : sessionCount;
+            updateProgress();
+            updateDisplay();
+        }
+        
+        // 跳过当前阶段
+        function skipPhase() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            timeDisplay.classList.remove('pulse-animation');
+            switchMode();
+        }
+        
+        // 事件监听
+        startPauseBtn.addEventListener('click', toggleStartPause);
+        resetBtn.addEventListener('click', resetTimer);
+        skipBtn.addEventListener('click', skipPhase);
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleStartPause();
+            } else if (e.code === 'KeyR

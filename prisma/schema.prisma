@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  credits   Int       @default(25)
+  plan      String    @default("free") // free | starter | pro
+  stripeCustomerId String?
+  createdAt DateTime  @default(now())
+  projects  Project[]
+  sessions  Session[]
+}
+
+// 简单 cookie 会话：存一个随机 token，映射到用户
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  @@index([token])
+}
+
+model Project {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  prompt    String
+  html      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  role      String   // user | assistant
+  content   String
+  createdAt DateTime @default(now())
+  @@index([projectId])
+}
